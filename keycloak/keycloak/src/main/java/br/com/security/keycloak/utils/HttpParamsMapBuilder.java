@@ -37,7 +37,7 @@ public class HttpParamsMapBuilder {
     }
 
     public HttpParamsMapBuilder withRefreshToken(String refreshToken) {
-        params.add("refreshToken", refreshToken);
+        params.add("refresh_token", refreshToken);
         return this;
     }
 

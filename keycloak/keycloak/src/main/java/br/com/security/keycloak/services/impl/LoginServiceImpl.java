@@ -9,7 +9,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 
 
@@ -50,7 +49,7 @@ public class LoginServiceImpl implements ILoginService<String> {
                 .build();
 
 
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, httpComponent.httpHeaders());
+        var request = new HttpEntity<>(map, httpComponent.httpHeaders());
 
         try {
 
@@ -64,6 +63,38 @@ public class LoginServiceImpl implements ILoginService<String> {
 
         } catch (HttpClientErrorException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseEntity<String> refreshToken(String refreshToken) {
+
+        httpComponent.httpHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        var map = HttpParamsMapBuilder.builder()
+                .withClient(clientId)
+                .withClientSecret(clientSecret)
+                .withGrantType("refresh_token")
+                .withRefreshToken(refreshToken)
+                .build();
+
+
+        var request = new HttpEntity<>(map, httpComponent.httpHeaders());
+
+        try {
+
+            var response = httpComponent.restTemplate().postForEntity(
+                    keyCloakServerUrl + "/protocol/openid-connect/token",
+                    request,
+                    String.class
+            );
+
+
+            return ResponseEntity.ok(response.getBody());
+
+        } catch (HttpClientErrorException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getMessage());
+
         }
     }
 }
